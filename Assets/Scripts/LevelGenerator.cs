@@ -19,7 +19,9 @@ public class LevelInfo
 
 public class LevelGenerator : MonoBehaviour
 {
-    static int dimension;
+    public int numberOfIslands;
+
+    public int dimension;
 
     public int[,] islandGrid;
 
@@ -29,11 +31,16 @@ public class LevelGenerator : MonoBehaviour
     List<Islands> islands = new List<Islands>();
     LevelInfo levelInfo = new LevelInfo();
     JsonData islandJson;
+
+    public GameObject rootPrefab, parentPrefab;
+    GameObject root, parent;
     void Start()
     {
         dimension = 5;
         islandGrid = new int[dimension, dimension];
+        root = Instantiate(rootPrefab, Vector3.zero, Quaternion.identity);
         CreateIsland();
+        
     }
 
     // Update is called once per frame
@@ -43,7 +50,7 @@ public class LevelGenerator : MonoBehaviour
     }
 
     void CreateIsland() {
-        for (int k = 0; k < 2; k++) {
+        for (int k = 0; k < numberOfIslands; k++) {
             islandBinary = "";
             for (int i = 0; i < dimension; i++)
             {
@@ -58,39 +65,89 @@ public class LevelGenerator : MonoBehaviour
                 }
             }
 
-            int z = -dimension / 2;
 
-            for (int i = 0; i < dimension; i++)
-            {
-                int x = -dimension / 2;
-                for (int j = 0; j < dimension; j++)
+            if (numberOfIslands == 0) {
+                parent = Instantiate(parentPrefab, Vector3.zero, Quaternion.identity);
+                parent.name = "Island_" + numberOfIslands.ToString();
+                parent.transform.SetParent(root.transform);
+
+                float z = -dimension / 2;
+
+                for (int i = 0; i < dimension; i++)
                 {
-                    if (islandGrid[i, j] == 1)
+                    float x = -dimension / 2;
+                    for (int j = 0; j < dimension; j++)
                     {
-                        float heightRange = Random.Range(0.3f, 0.7f);
-                        Instantiate(basicUnit, new Vector3(x, heightRange, z), Quaternion.identity);
+                        if (islandGrid[i, j] == 1)
+                        {
+                            float heightRange = Random.Range(0.3f, 0.7f);
+                            GameObject unit = Instantiate(basicUnit, new Vector3(x, heightRange, z), Quaternion.identity);
+                            unit.transform.SetParent(parent.transform);
+                        }
+
+                        x++;
                     }
 
-                    x++;
+                    z++;
                 }
-
-                z++;
+                CreateIslandConfiguration(Vector3.zero);
             }
+            else {
+                Vector3 newPos = Random.onUnitSphere * dimension;
+                newPos.y = 0f;
 
-            Islands newIsland = new Islands();
-            newIsland.position = Vector3.zero;
-            newIsland.islandConfiguration = islandBinary;
+                parent = Instantiate(parentPrefab, newPos, Quaternion.identity);
+                parent.name = "Island_" + numberOfIslands.ToString();
+                parent.transform.SetParent(root.transform);
 
-            islands.Add(newIsland);
+                float z = newPos.z - dimension / 2;
+
+                for (int i = 0; i < dimension; i++)
+                {
+                    float x = newPos.x - dimension / 2;
+                    for (int j = 0; j < dimension; j++)
+                    {
+                        if (islandGrid[i, j] == 1)
+                        {
+                            float heightRange = Random.Range(0.3f, 0.7f);
+                            GameObject unit = Instantiate(basicUnit, new Vector3(x, heightRange, z), Quaternion.identity);
+                            unit.transform.SetParent(parent.transform);
+                        }
+
+                        x++;
+                    }
+
+                    z++;
+                }
+                CreateIslandConfiguration(newPos);
+
+            }
 
         }
 
-        levelInfo.numOfIslands = 2;
+        WriteIslandToFile();
+    }
+
+    void CreateIslandConfiguration(Vector3 position) { 
+        Islands newIsland = new Islands();
+        newIsland.position = position;
+        newIsland.islandConfiguration = islandBinary;
+
+        islands.Add(newIsland);
+    }
+
+    void WriteIslandToFile() { 
+        levelInfo.numOfIslands = numberOfIslands;
         levelInfo.dimensions = dimension;
         levelInfo.islands = islands;
         islandJson = JsonMapper.ToJson(levelInfo);
         File.WriteAllText(Application.dataPath + "/level.json", islandJson.ToString());
     }
+
+    Vector3 RandomVector() {
+        return Vector3.zero;
+    }
 }
+
 
 

@@ -233,8 +233,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 144ad49acbc18b24d9eeb3007df9821e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  numberOfIslands: 3
   dimension: 5
   basicUnit: {fileID: 7600001352933622446, guid: fc2dce792a7a92142ba6f1fb5c2de538,
+    type: 3}
+  rootPrefab: {fileID: 3673628189020423618, guid: add4f8f2c2391c049aecf96a85aca0cd,
+    type: 3}
+  parentPrefab: {fileID: 4739246937553411514, guid: 68cc09888a7650b4790ed35882d66d56,
     type: 3}
 --- !u!4 &1561935677
 Transform:
